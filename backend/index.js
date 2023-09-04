@@ -1,25 +1,20 @@
 import express from 'express';
-import { PORT, mongoDBURL } from './config.js';
 import mongoose from 'mongoose';
 import booksRoute from './routes/booksRoute.js';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
 const app = express();
 
 // Middleware for parsing request body
 app.use(express.json());
+dotenv.config();
 
 // Middleware for handling CORS POLICY
-// Option 1: Allow All Origins with Default of cors(*)
 app.use(cors());
-// Option 2: Allow Custom Origins
-// app.use(
-//   cors({
-//     origin: 'http://localhost:3000',
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//     allowedHeaders: ['Content-Type'],
-//   })
-// );
+
+const dbURI = process.env.MONGODB_URI
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (request, response) => {
   console.log(request);
@@ -29,7 +24,10 @@ app.get('/', (request, response) => {
 app.use('/books', booksRoute);
 
 mongoose
-  .connect(mongoDBURL)
+  .connect(dbURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log('App connected to database');
     app.listen(PORT, () => {
